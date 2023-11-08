@@ -26,11 +26,11 @@ STATS:
         TEXT:
           SHOW: False
     TEMPERATURE:
-      INTERVAL: 5
+      INTERVAL: 0.5
       TEXT:
-        SHOW: False
+        SHOW: True
   GPU:
-    INTERVAL: 1
+    INTERVAL: 0.5
     PERCENTAGE:
       GRAPH:
         SHOW: False
@@ -131,9 +131,9 @@ STATS:
     INTERVAL: 1
     DAY:
       TEXT:
-        SHOW: False
+        SHOW: True
     HOUR:
       TEXT:
-        SHOW: False
+        SHOW: True
   CUSTOM:
     INTERVAL: 3

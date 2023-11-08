@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# turing-smart-screen-python - a Python system monitor and library for USB-C displays like Turing Smart Screen or XuanFang
+# turing-smart-screen-python - a Python system monitor and src for USB-C displays like Turing Smart Screen or XuanFang
 # https://github.com/mathoudebine/turing-smart-screen-python/
 
 # Copyright (C) 2021-2023  Matthieu Houdebine (mathoudebine)
@@ -43,7 +43,7 @@ try:
     import time
     from PIL import Image
 
-    if platform.system() == 'Windows':
+    if platform.system() == "Windows":
         import win32api
         import win32con
         import win32gui
@@ -54,23 +54,22 @@ try:
         pass
 except:
     print(
-        "[ERROR] Python dependencies not installed. Please follow start guide: https://github.com/mathoudebine/turing-smart-screen-python/wiki/System-monitor-:-how-to-start")
+        "[ERROR] Python dependencies not installed. Please follow start guide: https://github.com/mathoudebine/turing-smart-screen-python/wiki/System-monitor-:-how-to-start"
+    )
     try:
         sys.exit(0)
     except:
         os._exit(0)
 
-from library.log import logger
-import library.scheduler as scheduler
-from library.display import display
+from src.log import logger
+import src.scheduler as scheduler
+from src.display import display
 
 if __name__ == "__main__":
-
     # Apply system locale to this program
-    locale.setlocale(locale.LC_ALL, '')
+    locale.setlocale(locale.LC_ALL, "")
 
     logger.debug("Using Python %s" % sys.version)
-
 
     def clean_stop(tray_icon=None):
         # Turn screen and LEDs off before stopping
@@ -82,7 +81,10 @@ if __name__ == "__main__":
 
         # Allow 5 seconds max. delay in case scheduler is not responding
         wait_time = 5
-        logger.info("Waiting for all pending request to be sent to display (%ds max)..." % wait_time)
+        logger.info(
+            "Waiting for all pending request to be sent to display (%ds max)..."
+            % wait_time
+        )
 
         while not scheduler.is_queue_empty() and wait_time > 0:
             time.sleep(0.1)
@@ -100,36 +102,35 @@ if __name__ == "__main__":
         except:
             os._exit(0)
 
-
     def on_signal_caught(signum, frame=None):
         logger.info("Caught signal %d, exiting" % signum)
         clean_stop()
-
 
     def on_configure_tray(tray_icon, item):
         logger.info("Configure from tray icon")
         subprocess.Popen(os.path.join(os.getcwd(), "configure.py"), shell=True)
         clean_stop(tray_icon)
 
-
     def on_exit_tray(tray_icon, item):
         logger.info("Exit from tray icon")
         clean_stop(tray_icon)
-
 
     def on_clean_exit(*args):
         logger.info("Program will now exit")
         clean_stop()
 
-
     if platform.system() == "Windows":
+
         def on_win32_ctrl_event(event):
             """Handle Windows console control events (like Ctrl-C)."""
-            if event in (win32con.CTRL_C_EVENT, win32con.CTRL_BREAK_EVENT, win32con.CTRL_CLOSE_EVENT):
+            if event in (
+                win32con.CTRL_C_EVENT,
+                win32con.CTRL_BREAK_EVENT,
+                win32con.CTRL_CLOSE_EVENT,
+            ):
                 logger.debug("Caught Windows control event %s, exiting" % event)
                 clean_stop()
             return 0
-
 
         def on_win32_wm_event(hWnd, msg, wParam, lParam):
             """Handle Windows window message events (like ENDSESSION, CLOSE, DESTROY)."""
@@ -150,18 +151,14 @@ if __name__ == "__main__":
     # Create a tray icon for the program, with an Exit entry in menu
     try:
         tray_icon = pystray.Icon(
-            name='Turing System Monitor',
-            title='Turing System Monitor',
-            icon=Image.open("res/icons/monitor-icon-17865/64.png"),
+            name="Turing System Monitor",
+            title="Turing System Monitor",
+            icon=Image.open("assets/icons/monitor-icon-17865/64.png"),
             menu=pystray.Menu(
-                pystray.MenuItem(
-                    text='Configure',
-                    action=on_configure_tray),
+                pystray.MenuItem(text="Configure", action=on_configure_tray),
                 pystray.Menu.SEPARATOR,
-                pystray.MenuItem(
-                    text='Exit',
-                    action=on_exit_tray)
-            )
+                pystray.MenuItem(text="Exit", action=on_exit_tray),
+            ),
         )
 
         # For platforms != macOS, display the tray icon now with non-blocking function
@@ -176,7 +173,7 @@ if __name__ == "__main__":
     atexit.register(on_clean_exit)
     signal.signal(signal.SIGINT, on_signal_caught)
     signal.signal(signal.SIGTERM, on_signal_caught)
-    is_posix = os.name == 'posix'
+    is_posix = os.name == "posix"
     if is_posix:
         signal.signal(signal.SIGQUIT, on_signal_caught)
     if platform.system() == "Windows":
@@ -192,23 +189,23 @@ if __name__ == "__main__":
     display.display_static_text()
 
     # Run our jobs that update data
-    import library.stats as stats
+    import src.stats as stats
 
-    scheduler.CPUPercentage()
-    scheduler.CPUFrequency()
-    scheduler.CPULoad()
+    scheduler.cpu_percentage()
+    scheduler.cpu_frequency()
+    scheduler.cpu_load()
     if stats.CPU.is_temperature_available():
-        scheduler.CPUTemperature()
+        scheduler.cpu_temperature()
     else:
         logger.warning("Your CPU temperature is not supported yet")
     if stats.Gpu.is_available():
-        scheduler.GpuStats()
-    scheduler.MemoryStats()
-    scheduler.DiskStats()
-    scheduler.NetStats()
-    scheduler.DateStats()
-    scheduler.CustomStats()
-    scheduler.QueueHandler()
+        scheduler.gpu_stats()
+    scheduler.memory_stats()
+    scheduler.disk_stats()
+    scheduler.net_stats()
+    scheduler.date_stats()
+    scheduler.custom_stats()
+    scheduler.queue_handler()
 
     if tray_icon and platform.system() == "Darwin":  # macOS-specific
         from AppKit import NSBundle, NSApp, NSApplicationActivationPolicyProhibited
@@ -227,29 +224,33 @@ if __name__ == "__main__":
         wndclass = win32gui.WNDCLASS()
         wndclass.hInstance = hinst
         wndclass.lpszClassName = "turingEventWndClass"
-        messageMap = {win32con.WM_QUERYENDSESSION: on_win32_wm_event,
-                      win32con.WM_ENDSESSION: on_win32_wm_event,
-                      win32con.WM_QUIT: on_win32_wm_event,
-                      win32con.WM_DESTROY: on_win32_wm_event,
-                      win32con.WM_CLOSE: on_win32_wm_event,
-                      win32con.WM_POWERBROADCAST: on_win32_wm_event}
+        messageMap = {
+            win32con.WM_QUERYENDSESSION: on_win32_wm_event,
+            win32con.WM_ENDSESSION: on_win32_wm_event,
+            win32con.WM_QUIT: on_win32_wm_event,
+            win32con.WM_DESTROY: on_win32_wm_event,
+            win32con.WM_CLOSE: on_win32_wm_event,
+            win32con.WM_POWERBROADCAST: on_win32_wm_event,
+        }
 
         wndclass.lpfnWndProc = messageMap
 
         try:
             myWindowClass = win32gui.RegisterClass(wndclass)
-            hwnd = win32gui.CreateWindowEx(win32con.WS_EX_LEFT,
-                                           myWindowClass,
-                                           "turingEventWnd",
-                                           0,
-                                           0,
-                                           0,
-                                           win32con.CW_USEDEFAULT,
-                                           win32con.CW_USEDEFAULT,
-                                           0,
-                                           0,
-                                           hinst,
-                                           None)
+            hwnd = win32gui.CreateWindowEx(
+                win32con.WS_EX_LEFT,
+                myWindowClass,
+                "turingEventWnd",
+                0,
+                0,
+                0,
+                win32con.CW_USEDEFAULT,
+                win32con.CW_USEDEFAULT,
+                0,
+                0,
+                hinst,
+                None,
+            )
             while True:
                 # Receive and dispatch window messages
                 win32gui.PumpWaitingMessages()

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# turing-smart-screen-python - a Python system monitor and library for USB-C displays like Turing Smart Screen or XuanFang
+# turing-smart-screen-python - a Python system monitor and src for USB-C displays like Turing Smart Screen or XuanFang
 # https://github.com/mathoudebine/turing-smart-screen-python/
 
 # Copyright (C) 2021-2023  Matthieu Houdebine (mathoudebine)
@@ -24,8 +24,8 @@ import mmap
 import os
 import sys
 
-PNG_SIGNATURE = b'\x89\x50\x4E\x47\x0D\x0A\x1A\x0A'
-PNG_IEND = b'\x49\x45\x4E\x44\xAE\x42\x60\x82'
+PNG_SIGNATURE = b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"
+PNG_IEND = b"\x49\x45\x4E\x44\xAE\x42\x60\x82"
 
 MIN_PYTHON = (3, 8)
 if sys.version_info < MIN_PYTHON:
@@ -39,8 +39,8 @@ if len(sys.argv) != 2:
     print("Usage :")
     print("        turing-theme-extractor.py path/to/theme-file.data")
     print("Examples : ")
-    print("        turing-theme-extractor.py \"Dragon Ball.data\"")
-    print("        turing-theme-extractor.py \"Pikachu theme.data\"")
+    print('        turing-theme-extractor.py "Dragon Ball.data"')
+    print('        turing-theme-extractor.py "Pikachu theme.data"')
     print("        turing-theme-extractor.py NZXT_BLUR.data")
     try:
         sys.exit(0)
@@ -53,7 +53,7 @@ with open(sys.argv[1], "r+b") as theme_file:
     mm = mmap.mmap(theme_file.fileno(), 0)
 
     # Find PNG signature in binary data
-    start_pos=0
+    start_pos = 0
     header_found = mm.find(PNG_SIGNATURE, 0)
 
     while header_found != -1:
@@ -65,7 +65,7 @@ with open(sys.argv[1], "r+b") as theme_file:
 
         # Extract PNG data to a file
         theme_file.seek(header_found)
-        png_file = open('theme_res_' + str(header_found) + '.png', 'wb')
+        png_file = open("theme_res_" + str(header_found) + ".png", "wb")
         png_file.write(theme_file.read(iend_found - header_found + len(PNG_IEND)))
         png_file.close()
 
@@ -76,4 +76,3 @@ with open(sys.argv[1], "r+b") as theme_file:
         header_found = mm.find(PNG_SIGNATURE, iend_found)
 
     print("\n%d PNG files extracted from theme to current directory" % found_png)
-

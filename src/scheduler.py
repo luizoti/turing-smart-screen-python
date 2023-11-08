@@ -1,7 +1,7 @@
-# turing-smart-screen-python - a Python system monitor and library for USB-C displays like Turing Smart Screen or XuanFang
+# turing-smart-screen-python - a Python system monitor and src for USB-C displays like Turing Smart Screen or XuanFang
 # https://github.com/mathoudebine/turing-smart-screen-python/
 
-# Copyright (C) 2021-2023  Matthieu Houdebine (mathoudebine)
+# Copyright (C) 2021-2023  _ (mathoudebine)
 # Copyright (C) 2022-2023  Rollbacke
 # Copyright (C) 2022-2023  Ebag333
 #
@@ -24,22 +24,24 @@ import time
 from datetime import timedelta
 from functools import wraps
 
-import library.config as config
-import library.stats as stats
+import src.config as config
+import src.stats as stats
 
 STOPPING = False
 
 
-def async_job(threadname=None):
-    """ wrapper to handle asynchronous threads """
+def async_job(thread_name=None):
+    """wrapper to handle asynchronous threads"""
 
     def decorator(func):
-        """ Decorator to extend async_func """
+        """Decorator to extend async_func"""
 
         @wraps(func)
         def async_func(*args, **kwargs):
-            """ create an asynchronous function to wrap around our thread """
-            func_hl = threading.Thread(target=func, name=threadname, args=args, kwargs=kwargs)
+            """create an asynchronous function to wrap around our thread"""
+            func_hl = threading.Thread(
+                target=func, name=thread_name, args=args, kwargs=kwargs
+            )
             func_hl.start()
             return func_hl
 
@@ -49,26 +51,27 @@ def async_job(threadname=None):
 
 
 def schedule(interval):
-    """ wrapper to schedule asynchronous threads """
+    """wrapper to schedule asynchronous threads"""
 
     def decorator(func):
-        """ Decorator to extend periodic """
+        """Decorator to extend periodic"""
 
-        def periodic(scheduler, periodic_interval, action, actionargs=()):
-            """ Wrap the scheduler with our periodic interval """
+        def periodic(scheduler, periodic_interval, action, action_args=()):
+            """Wrap the scheduler with our periodic interval"""
             global STOPPING
             if not STOPPING:
                 # If the program is not stopping: re-schedule the task for future execution
-                scheduler.enter(periodic_interval, 1, periodic,
-                                (scheduler, periodic_interval, action, actionargs))
-            action(*actionargs)
+                scheduler.enter(
+                    periodic_interval,
+                    1,
+                    periodic,
+                    (scheduler, periodic_interval, action, action_args),
+                )
+            action(*action_args)
 
         @wraps(func)
-        def wrap(
-                *args,
-                **kwargs
-        ):
-            """ Wrapper to create our schedule and run it at the appropriate time """
+        def wrap(*args, **kwargs):
+            """Wrapper to create our schedule and run it at the appropriate time"""
             scheduler = sched.scheduler(time.time, time.sleep)
             periodic(scheduler, interval, func)
             scheduler.run()
@@ -79,83 +82,123 @@ def schedule(interval):
 
 
 @async_job("CPU_Percentage")
-@schedule(timedelta(seconds=config.THEME_DATA['STATS']['CPU']['PERCENTAGE'].get("INTERVAL", None)).total_seconds())
-def CPUPercentage():
-    """ Refresh the CPU Percentage """
+@schedule(
+    timedelta(
+        seconds=config.THEME_DATA["STATS"]["CPU"]["PERCENTAGE"].get("INTERVAL", None)
+    ).total_seconds()
+)
+def cpu_percentage():
+    """Refresh the CPU Percentage"""
     # logger.debug("Refresh CPU Percentage")
     stats.CPU.percentage()
 
 
 @async_job("CPU_Frequency")
-@schedule(timedelta(seconds=config.THEME_DATA['STATS']['CPU']['FREQUENCY'].get("INTERVAL", None)).total_seconds())
-def CPUFrequency():
-    """ Refresh the CPU Frequency """
+@schedule(
+    timedelta(
+        seconds=config.THEME_DATA["STATS"]["CPU"]["FREQUENCY"].get("INTERVAL", None)
+    ).total_seconds()
+)
+def cpu_frequency():
+    """Refresh the CPU Frequency"""
     # logger.debug("Refresh CPU Frequency")
     stats.CPU.frequency()
 
 
 @async_job("CPU_Load")
-@schedule(timedelta(seconds=config.THEME_DATA['STATS']['CPU']['LOAD'].get("INTERVAL", None)).total_seconds())
-def CPULoad():
-    """ Refresh the CPU Load """
+@schedule(
+    timedelta(
+        seconds=config.THEME_DATA["STATS"]["CPU"]["LOAD"].get("INTERVAL", None)
+    ).total_seconds()
+)
+def cpu_load():
+    """Refresh the CPU Load"""
     # logger.debug("Refresh CPU Load")
     stats.CPU.load()
 
 
 @async_job("CPU_Load")
-@schedule(timedelta(seconds=config.THEME_DATA['STATS']['CPU']['TEMPERATURE'].get("INTERVAL", None)).total_seconds())
-def CPUTemperature():
-    """ Refresh the CPU Temperature """
+@schedule(
+    timedelta(
+        seconds=config.THEME_DATA["STATS"]["CPU"]["TEMPERATURE"].get("INTERVAL", None)
+    ).total_seconds()
+)
+def cpu_temperature():
+    """Refresh the CPU Temperature"""
     # logger.debug("Refresh CPU Temperature")
     stats.CPU.temperature()
 
 
 @async_job("GPU_Stats")
-@schedule(timedelta(seconds=config.THEME_DATA['STATS']['GPU'].get("INTERVAL", None)).total_seconds())
-def GpuStats():
-    """ Refresh the GPU Stats """
+@schedule(
+    timedelta(
+        seconds=config.THEME_DATA["STATS"]["GPU"].get("INTERVAL", None)
+    ).total_seconds()
+)
+def gpu_stats():
+    """Refresh the GPU Stats"""
     # logger.debug("Refresh GPU Stats")
     stats.Gpu.stats()
 
 
 @async_job("Memory_Stats")
-@schedule(timedelta(seconds=config.THEME_DATA['STATS']['MEMORY'].get("INTERVAL", None)).total_seconds())
-def MemoryStats():
+@schedule(
+    timedelta(
+        seconds=config.THEME_DATA["STATS"]["MEMORY"].get("INTERVAL", None)
+    ).total_seconds()
+)
+def memory_stats():
     # logger.debug("Refresh memory stats")
     stats.Memory.stats()
 
 
 @async_job("Disk_Stats")
-@schedule(timedelta(seconds=config.THEME_DATA['STATS']['DISK'].get("INTERVAL", None)).total_seconds())
-def DiskStats():
+@schedule(
+    timedelta(
+        seconds=config.THEME_DATA["STATS"]["DISK"].get("INTERVAL", None)
+    ).total_seconds()
+)
+def disk_stats():
     # logger.debug("Refresh disk stats")
     stats.Disk.stats()
 
 
 @async_job("Net_Stats")
-@schedule(timedelta(seconds=config.THEME_DATA['STATS']['NET'].get("INTERVAL", None)).total_seconds())
-def NetStats():
+@schedule(
+    timedelta(
+        seconds=config.THEME_DATA["STATS"]["NET"].get("INTERVAL", None)
+    ).total_seconds()
+)
+def net_stats():
     # logger.debug("Refresh net stats")
     stats.Net.stats()
 
 
 @async_job("Date_Stats")
-@schedule(timedelta(seconds=config.THEME_DATA['STATS']['DATE'].get("INTERVAL", None)).total_seconds())
-def DateStats():
+@schedule(
+    timedelta(
+        seconds=config.THEME_DATA["STATS"]["DATE"].get("INTERVAL", None)
+    ).total_seconds()
+)
+def date_stats():
     # logger.debug("Refresh date stats")
     stats.Date.stats()
 
 
 @async_job("Custom_Stats")
-@schedule(timedelta(seconds=config.THEME_DATA['STATS']['CUSTOM'].get("INTERVAL", None)).total_seconds())
-def CustomStats():
+@schedule(
+    timedelta(
+        seconds=config.THEME_DATA["STATS"]["CUSTOM"].get("INTERVAL", None)
+    ).total_seconds()
+)
+def custom_stats():
     # print("Refresh custom stats")
     stats.Custom.stats()
 
 
 @async_job("Queue_Handler")
 @schedule(timedelta(milliseconds=1).total_seconds())
-def QueueHandler():
+def queue_handler():
     # Do next action waiting in the queue
     global STOPPING
     if STOPPING:

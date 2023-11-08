@@ -1,4 +1,4 @@
-# turing-smart-screen-python - a Python system monitor and library for USB-C displays like Turing Smart Screen or XuanFang
+# turing-smart-screen-python - a Python system monitor and src for USB-C displays like Turing Smart Screen or XuanFang
 # https://github.com/mathoudebine/turing-smart-screen-python/
 
 # Copyright (C) 2021-2023  Matthieu Houdebine (mathoudebine)
@@ -55,7 +55,7 @@ class ExampleCustomNumericData(CustomDataSource):
         # It is also possible to return a text unrelated to the numeric value
         # If this function is empty, the numeric value will be used as string without formatting
         # Example here: format numeric value: add unit as a suffix, and keep 1 digit decimal precision
-        return f'{self.as_numeric(): .1f}%'
+        return f"{self.as_numeric(): .1f}%"
         # Important note! If your numeric value can vary in size, be sure to display it with a default size.
         # E.g. if your value can range from 0 to 9999, you need to display it with at least 4 characters every time.
         # --> return f'{self.as_numeric():>4}%'

@@ -1,4 +1,4 @@
-# turing-smart-screen-python - a Python system monitor and library for USB-C displays like Turing Smart Screen or XuanFang
+# turing-smart-screen-python - a Python system monitor and src for USB-C displays like Turing Smart Screen or XuanFang
 # https://github.com/mathoudebine/turing-smart-screen-python/
 
 # Copyright (C) 2021-2023  Matthieu Houdebine (mathoudebine)
@@ -53,7 +53,9 @@ class Cpu(ABC):
 class Gpu(ABC):
     @staticmethod
     @abstractmethod
-    def stats() -> Tuple[float, float, float, float]:  # load (%) / used mem (%) / used mem (Mb) / temp (°C)
+    def stats() -> (
+        Tuple[float, float, float, float]
+    ):  # load (%) / used mem (%) / used mem (Mb) / temp (°C)
         pass
 
     @staticmethod
@@ -109,6 +111,9 @@ class Disk(ABC):
 class Net(ABC):
     @staticmethod
     @abstractmethod
-    def stats(if_name, interval) -> Tuple[
-        int, int, int, int]:  # up rate (B/s), uploaded (B), dl rate (B/s), downloaded (B)
+    def stats(
+        if_name, interval
+    ) -> Tuple[
+        int, int, int, int
+    ]:  # up rate (B/s), uploaded (B), dl rate (B/s), downloaded (B)
         pass

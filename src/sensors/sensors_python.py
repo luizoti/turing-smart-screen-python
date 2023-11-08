@@ -1,4 +1,4 @@
-# turing-smart-screen-python - a Python system monitor and library for USB-C displays like Turing Smart Screen or XuanFang
+# turing-smart-screen-python - a Python system monitor and src for USB-C displays like Turing Smart Screen or XuanFang
 # https://github.com/mathoudebine/turing-smart-screen-python/
 
 # Copyright (C) 2021-2023  Matthieu Houdebine (mathoudebine)
@@ -27,11 +27,12 @@ from typing import Tuple
 
 # Nvidia GPU
 import GPUtil
+
 # CPU & disk sensors
 import psutil
 
-import library.sensors.sensors as sensors
-from library.log import logger
+import src.sensors.sensors as sensors
+from src.log import logger
 
 # AMD GPU on Linux
 try:
@@ -74,7 +75,12 @@ class Cpu(sensors.Cpu):
     def is_temperature_available() -> bool:
         try:
             sensors_temps = psutil.sensors_temperatures()
-            if 'coretemp' in sensors_temps or 'k10temp' in sensors_temps or 'cpu_thermal' in sensors_temps or 'zenpower' in sensors_temps:
+            if (
+                "coretemp" in sensors_temps
+                or "k10temp" in sensors_temps
+                or "cpu_thermal" in sensors_temps
+                or "zenpower" in sensors_temps
+            ):
                 return True
             else:
                 return False
@@ -86,24 +92,26 @@ class Cpu(sensors.Cpu):
     def temperature() -> float:
         cpu_temp = 0
         sensors_temps = psutil.sensors_temperatures()
-        if 'coretemp' in sensors_temps:
+        if "coretemp" in sensors_temps:
             # Intel CPU
-            cpu_temp = sensors_temps['coretemp'][0].current
-        elif 'k10temp' in sensors_temps:
+            cpu_temp = sensors_temps["coretemp"][0].current
+        elif "k10temp" in sensors_temps:
             # AMD CPU
-            cpu_temp = sensors_temps['k10temp'][0].current
-        elif 'cpu_thermal' in sensors_temps:
+            cpu_temp = sensors_temps["k10temp"][0].current
+        elif "cpu_thermal" in sensors_temps:
             # ARM CPU
-            cpu_temp = sensors_temps['cpu_thermal'][0].current
-        elif 'zenpower' in sensors_temps:
+            cpu_temp = sensors_temps["cpu_thermal"][0].current
+        elif "zenpower" in sensors_temps:
             # AMD CPU with zenpower (k10temp is in blacklist)
-            cpu_temp = sensors_temps['zenpower'][0].current
+            cpu_temp = sensors_temps["zenpower"][0].current
         return cpu_temp
 
 
 class Gpu(sensors.Gpu):
     @staticmethod
-    def stats() -> Tuple[float, float, float, float]:  # load (%) / used mem (%) / used mem (Mb) / temp (°C)
+    def stats() -> (
+        Tuple[float, float, float, float]
+    ):  # load (%) / used mem (%) / used mem (Mb) / temp (°C)
         global DETECTED_GPU
         if DETECTED_GPU == GpuType.AMD:
             return GpuAmd.stats()
@@ -129,16 +137,22 @@ class Gpu(sensors.Gpu):
         else:
             logger.warning("No supported GPU found")
             DETECTED_GPU = GpuType.UNSUPPORTED
-            if sys.version_info >= (3, 11) and (platform.system() == "Linux" or platform.system() == "Darwin"):
-                logger.warning("If you have an AMD GPU, you may need to install some  libraries manually: see "
-                               "https://github.com/mathoudebine/turing-smart-screen-python/wiki/Troubleshooting#linux--macos-no-supported-gpu-found-with-an-amd-gpu-and-python-311")
+            if sys.version_info >= (3, 11) and (
+                platform.system() == "Linux" or platform.system() == "Darwin"
+            ):
+                logger.warning(
+                    "If you have an AMD GPU, you may need to install some  libraries manually: see "
+                    "https://github.com/mathoudebine/turing-smart-screen-python/wiki/Troubleshooting#linux--macos-no-supported-gpu-found-with-an-amd-gpu-and-python-311"
+                )
 
         return DETECTED_GPU != GpuType.UNSUPPORTED
 
 
 class GpuNvidia(sensors.Gpu):
     @staticmethod
-    def stats() -> Tuple[float, float, float, float]:  # load (%) / used mem (%) / used mem (Mb) / temp (°C)
+    def stats() -> (
+        Tuple[float, float, float, float]
+    ):  # load (%) / used mem (%) / used mem (Mb) / temp (°C)
         # Unlike other sensors, Nvidia GPU with GPUtil pulls in all the stats at once
         nvidia_gpus = GPUtil.getGPUs()
 
@@ -184,7 +198,9 @@ class GpuNvidia(sensors.Gpu):
 
 class GpuAmd(sensors.Gpu):
     @staticmethod
-    def stats() -> Tuple[float, float, float, float]:  # load (%) / used mem (%) / used mem (Mb) / temp (°C)
+    def stats() -> (
+        Tuple[float, float, float, float]
+    ):  # load (%) / used mem (%) / used mem (Mb) / temp (°C)
         if pyamdgpuinfo:
             # Unlike other sensors, AMD GPU with pyamdgpuinfo pulls in all the stats at once
             i = 0
@@ -226,7 +242,7 @@ class GpuAmd(sensors.Gpu):
 
             try:
                 load_all = [item.getCurrentUsage() for item in amd_gpus]
-                load = (sum(load_all) / len(load_all))
+                load = sum(load_all) / len(load_all)
             except:
                 load = math.nan
 
@@ -291,8 +307,11 @@ class Disk(sensors.Disk):
 
 class Net(sensors.Net):
     @staticmethod
-    def stats(if_name, interval) -> Tuple[
-        int, int, int, int]:  # up rate (B/s), uploaded (B), dl rate (B/s), downloaded (B)
+    def stats(
+        if_name, interval
+    ) -> Tuple[
+        int, int, int, int
+    ]:  # up rate (B/s), uploaded (B), dl rate (B/s), downloaded (B)
         global PNIC_BEFORE
         # Get current counters
         pnic_after = psutil.net_io_counters(pernic=True)
@@ -305,9 +324,13 @@ class Net(sensors.Net):
         if if_name != "":
             if if_name in pnic_after:
                 try:
-                    upload_rate = (pnic_after[if_name].bytes_sent - PNIC_BEFORE[if_name].bytes_sent) / interval
+                    upload_rate = (
+                        pnic_after[if_name].bytes_sent - PNIC_BEFORE[if_name].bytes_sent
+                    ) / interval
                     uploaded = pnic_after[if_name].bytes_sent
-                    download_rate = (pnic_after[if_name].bytes_recv - PNIC_BEFORE[if_name].bytes_recv) / interval
+                    download_rate = (
+                        pnic_after[if_name].bytes_recv - PNIC_BEFORE[if_name].bytes_recv
+                    ) / interval
                     downloaded = pnic_after[if_name].bytes_recv
                 except:
                     # Interface might not be in PNIC_BEFORE for now
@@ -315,6 +338,9 @@ class Net(sensors.Net):
 
                 PNIC_BEFORE.update({if_name: pnic_after[if_name]})
             else:
-                logger.warning("Network interface '%s' not found. Check names in config.yaml." % if_name)
+                logger.warning(
+                    "Network interface '%s' not found. Check names in config.yaml."
+                    % if_name
+                )
 
         return upload_rate, uploaded, download_rate, downloaded

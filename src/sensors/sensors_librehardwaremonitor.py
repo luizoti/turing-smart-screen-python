@@ -1,4 +1,4 @@
-# turing-smart-screen-python - a Python system monitor and library for USB-C displays like Turing Smart Screen or XuanFang
+# turing-smart-screen-python - a Python system monitor and src for USB-C displays like Turing Smart Screen or XuanFang
 # https://github.com/mathoudebine/turing-smart-screen-python/
 
 # Copyright (C) 2021-2023  Matthieu Houdebine (mathoudebine)
@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-# This file will use LibreHardwareMonitor.dll library to get hardware sensors
+# This file will use LibreHardwareMonitor.dll src to get hardware sensors
 # Some metrics are still fetched by psutil when not available on LibreHardwareMonitor
 # For Windows platforms only
 
@@ -31,31 +31,40 @@ import clr  # Clr is from pythonnet package. Do not install clr package
 import psutil
 from win32api import *
 
-import library.sensors.sensors as sensors
-from library.log import logger
+import src.sensors.sensors as sensors
+from src.log import logger
 
 # Import LibreHardwareMonitor dll to Python
-lhm_dll = os.getcwd() + '\\external\\LibreHardwareMonitor\\LibreHardwareMonitorLib.dll'
+lhm_dll = os.getcwd() + "\\external\\LibreHardwareMonitor\\LibreHardwareMonitorLib.dll"
 # noinspection PyUnresolvedReferences
 clr.AddReference(lhm_dll)
 # noinspection PyUnresolvedReferences
-clr.AddReference(os.getcwd() + '\\external\\LibreHardwareMonitor\\HidSharp.dll')
+clr.AddReference(os.getcwd() + "\\external\\LibreHardwareMonitor\\HidSharp.dll")
 # noinspection PyUnresolvedReferences
 from LibreHardwareMonitor import Hardware
 
 File_information = GetFileVersionInfo(lhm_dll, "\\")
 
-ms_file_version = File_information['FileVersionMS']
-ls_file_version = File_information['FileVersionLS']
+ms_file_version = File_information["FileVersionMS"]
+ls_file_version = File_information["FileVersionLS"]
 
-logger.debug("Found LibreHardwareMonitorLib %s" % ".".join([str(HIWORD(ms_file_version)), str(LOWORD(ms_file_version)),
-                                                            str(HIWORD(ls_file_version)),
-                                                            str(LOWORD(ls_file_version))]))
+logger.debug(
+    "Found LibreHardwareMonitorLib %s"
+    % ".".join(
+        [
+            str(HIWORD(ms_file_version)),
+            str(LOWORD(ms_file_version)),
+            str(HIWORD(ls_file_version)),
+            str(LOWORD(ls_file_version)),
+        ]
+    )
+)
 
 if ctypes.windll.shell32.IsUserAnAdmin() == 0:
     logger.error(
         "Program is not running as administrator. Please run with admin rights or choose another HW_SENSORS option in "
-        "config.yaml")
+        "config.yaml"
+    )
     try:
         sys.exit(0)
     except:
@@ -87,7 +96,9 @@ for hardware in handle.Hardware:
         logger.info("Found Network interface: %s" % hardware.Name)
 
 
-def get_hw_and_update(hwtype: Hardware.HardwareType, name: str = None) -> Hardware.Hardware:
+def get_hw_and_update(
+    hwtype: Hardware.HardwareType, name: str = None
+) -> Hardware.Hardware:
     for hardware in handle.Hardware:
         if hardware.HardwareType == hwtype:
             if (name and hardware.Name == name) or not name:
@@ -100,9 +111,11 @@ def get_gpu_name() -> str:
     # Determine which GPU to use, in case there are multiple : try to avoid using discrete GPU for stats
     hw_gpus = []
     for hardware in handle.Hardware:
-        if hardware.HardwareType == Hardware.HardwareType.GpuNvidia \
-                or hardware.HardwareType == Hardware.HardwareType.GpuAmd \
-                or hardware.HardwareType == Hardware.HardwareType.GpuIntel:
+        if (
+            hardware.HardwareType == Hardware.HardwareType.GpuNvidia
+            or hardware.HardwareType == Hardware.HardwareType.GpuAmd
+            or hardware.HardwareType == Hardware.HardwareType.GpuIntel
+        ):
             hw_gpus.append(hardware)
 
     if len(hw_gpus) == 0:
@@ -131,8 +144,9 @@ def get_gpu_name() -> str:
                 nvidia_gpus += 1
 
         logger.warning(
-            "Found %d GPUs on your system (%d AMD / %d Nvidia / %d Intel). Auto identify which GPU to use." % (
-            len(hw_gpus), amd_gpus, nvidia_gpus, intel_gpus))
+            "Found %d GPUs on your system (%d AMD / %d Nvidia / %d Intel). Auto identify which GPU to use."
+            % (len(hw_gpus), amd_gpus, nvidia_gpus, intel_gpus)
+        )
 
         if nvidia_gpus >= 1:
             # One (or more) Nvidia GPU: use first available for stats
@@ -145,7 +159,9 @@ def get_gpu_name() -> str:
             for gpu in hw_gpus:
                 if gpu.HardwareType == Hardware.HardwareType.GpuAmd:
                     for sensor in gpu.Sensors:
-                        if sensor.SensorType == Hardware.SensorType.Load and str(sensor.Name).startswith("GPU Core"):
+                        if sensor.SensorType == Hardware.SensorType.Load and str(
+                            sensor.Name
+                        ).startswith("GPU Core"):
                             # Found load sensor for this GPU: assume it is main GPU and use it for stats
                             gpu_to_use = gpu.Name
         else:
@@ -162,11 +178,16 @@ def get_gpu_name() -> str:
 
 def get_net_interface_and_update(if_name: str) -> Hardware.Hardware:
     for hardware in handle.Hardware:
-        if hardware.HardwareType == Hardware.HardwareType.Network and hardware.Name == if_name:
+        if (
+            hardware.HardwareType == Hardware.HardwareType.Network
+            and hardware.Name == if_name
+        ):
             hardware.Update()
             return hardware
 
-    logger.warning("Network interface '%s' not found. Check names in config.yaml." % if_name)
+    logger.warning(
+        "Network interface '%s' not found. Check names in config.yaml." % if_name
+    )
     return None
 
 
@@ -175,7 +196,9 @@ class Cpu(sensors.Cpu):
     def percentage(interval: float) -> float:
         cpu = get_hw_and_update(Hardware.HardwareType.Cpu)
         for sensor in cpu.Sensors:
-            if sensor.SensorType == Hardware.SensorType.Load and str(sensor.Name).startswith("CPU Total"):
+            if sensor.SensorType == Hardware.SensorType.Load and str(
+                sensor.Name
+            ).startswith("CPU Total"):
                 return float(sensor.Value)
 
         logger.error("CPU load cannot be read")
@@ -209,7 +232,9 @@ class Cpu(sensors.Cpu):
         cpu = get_hw_and_update(Hardware.HardwareType.Cpu)
         for sensor in cpu.Sensors:
             if sensor.SensorType == Hardware.SensorType.Temperature:
-                if str(sensor.Name).startswith("Core") or str(sensor.Name).startswith("CPU Package"):
+                if str(sensor.Name).startswith("Core") or str(sensor.Name).startswith(
+                    "CPU Package"
+                ):
                     return True
 
         return False
@@ -219,19 +244,27 @@ class Cpu(sensors.Cpu):
         cpu = get_hw_and_update(Hardware.HardwareType.Cpu)
         # By default, the average temperature of all CPU cores will be used
         for sensor in cpu.Sensors:
-            if sensor.SensorType == Hardware.SensorType.Temperature and str(sensor.Name).startswith("Core Average"):
+            if sensor.SensorType == Hardware.SensorType.Temperature and str(
+                sensor.Name
+            ).startswith("Core Average"):
                 return float(sensor.Value)
         # If not available, the max core temperature will be used
         for sensor in cpu.Sensors:
-            if sensor.SensorType == Hardware.SensorType.Temperature and str(sensor.Name).startswith("Core Max"):
+            if sensor.SensorType == Hardware.SensorType.Temperature and str(
+                sensor.Name
+            ).startswith("Core Max"):
                 return float(sensor.Value)
         # If not available, the CPU Package temperature (usually same as max core temperature) will be used
         for sensor in cpu.Sensors:
-            if sensor.SensorType == Hardware.SensorType.Temperature and str(sensor.Name).startswith("CPU Package"):
+            if sensor.SensorType == Hardware.SensorType.Temperature and str(
+                sensor.Name
+            ).startswith("CPU Package"):
                 return float(sensor.Value)
         # Otherwise any sensor named "Core..." will be used
         for sensor in cpu.Sensors:
-            if sensor.SensorType == Hardware.SensorType.Temperature and str(sensor.Name).startswith("Core"):
+            if sensor.SensorType == Hardware.SensorType.Temperature and str(
+                sensor.Name
+            ).startswith("Core"):
                 return float(sensor.Value)
 
         return math.nan
@@ -245,10 +278,16 @@ class Gpu(sensors.Gpu):
     prev_fps = 0
 
     @classmethod
-    def stats(cls) -> Tuple[float, float, float, float]:  # load (%) / used mem (%) / used mem (Mb) / temp (°C)
+    def stats(
+        cls,
+    ) -> Tuple[
+        float, float, float, float
+    ]:  # load (%) / used mem (%) / used mem (Mb) / temp (°C)
         gpu_to_use = get_hw_and_update(Hardware.HardwareType.GpuAmd, cls.gpu_name)
         if gpu_to_use is None:
-            gpu_to_use = get_hw_and_update(Hardware.HardwareType.GpuNvidia, cls.gpu_name)
+            gpu_to_use = get_hw_and_update(
+                Hardware.HardwareType.GpuNvidia, cls.gpu_name
+            )
         if gpu_to_use is None:
             gpu_to_use = get_hw_and_update(Hardware.HardwareType.GpuIntel, cls.gpu_name)
         if gpu_to_use is None:
@@ -261,18 +300,29 @@ class Gpu(sensors.Gpu):
         temp = math.nan
 
         for sensor in gpu_to_use.Sensors:
-            if sensor.SensorType == Hardware.SensorType.Load and str(sensor.Name).startswith("GPU Core"):
+            if sensor.SensorType == Hardware.SensorType.Load and str(
+                sensor.Name
+            ).startswith("GPU Core"):
                 load = float(sensor.Value)
-            elif sensor.SensorType == Hardware.SensorType.SmallData and str(sensor.Name).startswith("GPU Memory Used"):
+            elif sensor.SensorType == Hardware.SensorType.SmallData and str(
+                sensor.Name
+            ).startswith("GPU Memory Used"):
                 used_mem = float(sensor.Value)
-            elif sensor.SensorType == Hardware.SensorType.SmallData and str(sensor.Name).startswith(
-                    "D3D Dedicated Memory Used") and math.isnan(used_mem):
+            elif (
+                sensor.SensorType == Hardware.SensorType.SmallData
+                and str(sensor.Name).startswith("D3D Dedicated Memory Used")
+                and math.isnan(used_mem)
+            ):
                 # Only use D3D memory usage if global "GPU Memory Used" sensor is not available, because it is less
                 # precise and does not cover the entire GPU: https://www.hwinfo.com/forum/threads/what-is-d3d-usage.759/
                 used_mem = float(sensor.Value)
-            elif sensor.SensorType == Hardware.SensorType.SmallData and str(sensor.Name).startswith("GPU Memory Total"):
+            elif sensor.SensorType == Hardware.SensorType.SmallData and str(
+                sensor.Name
+            ).startswith("GPU Memory Total"):
                 total_mem = float(sensor.Value)
-            elif sensor.SensorType == Hardware.SensorType.Temperature and str(sensor.Name).startswith("GPU Core"):
+            elif sensor.SensorType == Hardware.SensorType.Temperature and str(
+                sensor.Name
+            ).startswith("GPU Core"):
                 temp = float(sensor.Value)
 
         return load, (used_mem / total_mem * 100.0), used_mem, temp
@@ -281,7 +331,9 @@ class Gpu(sensors.Gpu):
     def fps(cls) -> int:
         gpu_to_use = get_hw_and_update(Hardware.HardwareType.GpuAmd, cls.gpu_name)
         if gpu_to_use is None:
-            gpu_to_use = get_hw_and_update(Hardware.HardwareType.GpuNvidia, cls.gpu_name)
+            gpu_to_use = get_hw_and_update(
+                Hardware.HardwareType.GpuNvidia, cls.gpu_name
+            )
         if gpu_to_use is None:
             gpu_to_use = get_hw_and_update(Hardware.HardwareType.GpuIntel, cls.gpu_name)
         if gpu_to_use is None:
@@ -289,7 +341,9 @@ class Gpu(sensors.Gpu):
             return -1
 
         for sensor in gpu_to_use.Sensors:
-            if sensor.SensorType == Hardware.SensorType.Factor and "FPS" in str(sensor.Name):
+            if sensor.SensorType == Hardware.SensorType.Factor and "FPS" in str(
+                sensor.Name
+            ):
                 # If a reading returns a value <= 0, returns old value instead
                 if int(sensor.Value) > 0:
                     cls.prev_fps = int(sensor.Value)
@@ -316,14 +370,21 @@ class Memory(sensors.Memory):
 
         # Get virtual / physical memory stats
         for sensor in memory.Sensors:
-            if sensor.SensorType == Hardware.SensorType.Data and str(sensor.Name).startswith("Virtual Memory Used"):
+            if sensor.SensorType == Hardware.SensorType.Data and str(
+                sensor.Name
+            ).startswith("Virtual Memory Used"):
                 virtual_mem_used = int(sensor.Value)
-            elif sensor.SensorType == Hardware.SensorType.Data and str(sensor.Name).startswith("Memory Used"):
+            elif sensor.SensorType == Hardware.SensorType.Data and str(
+                sensor.Name
+            ).startswith("Memory Used"):
                 mem_used = int(sensor.Value)
-            elif sensor.SensorType == Hardware.SensorType.Data and str(sensor.Name).startswith(
-                    "Virtual Memory Available"):
+            elif sensor.SensorType == Hardware.SensorType.Data and str(
+                sensor.Name
+            ).startswith("Virtual Memory Available"):
                 virtual_mem_available = int(sensor.Value)
-            elif sensor.SensorType == Hardware.SensorType.Data and str(sensor.Name).startswith("Memory Available"):
+            elif sensor.SensorType == Hardware.SensorType.Data and str(
+                sensor.Name
+            ).startswith("Memory Available"):
                 mem_available = int(sensor.Value)
 
         # Compute swap stats from virtual / physical memory stats
@@ -337,7 +398,9 @@ class Memory(sensors.Memory):
     def virtual_percent() -> float:
         memory = get_hw_and_update(Hardware.HardwareType.Memory)
         for sensor in memory.Sensors:
-            if sensor.SensorType == Hardware.SensorType.Load and str(sensor.Name).startswith("Memory"):
+            if sensor.SensorType == Hardware.SensorType.Load and str(
+                sensor.Name
+            ).startswith("Memory"):
                 return float(sensor.Value)
 
         return math.nan
@@ -346,7 +409,9 @@ class Memory(sensors.Memory):
     def virtual_used() -> int:  # In bytes
         memory = get_hw_and_update(Hardware.HardwareType.Memory)
         for sensor in memory.Sensors:
-            if sensor.SensorType == Hardware.SensorType.Data and str(sensor.Name).startswith("Memory Used"):
+            if sensor.SensorType == Hardware.SensorType.Data and str(
+                sensor.Name
+            ).startswith("Memory Used"):
                 return int(sensor.Value * 1000000000.0)
 
         return 0
@@ -355,14 +420,16 @@ class Memory(sensors.Memory):
     def virtual_free() -> int:  # In bytes
         memory = get_hw_and_update(Hardware.HardwareType.Memory)
         for sensor in memory.Sensors:
-            if sensor.SensorType == Hardware.SensorType.Data and str(sensor.Name).startswith("Memory Available"):
+            if sensor.SensorType == Hardware.SensorType.Data and str(
+                sensor.Name
+            ).startswith("Memory Available"):
                 return int(sensor.Value * 1000000000.0)
 
         return 0
 
 
-# NOTE: all disk data are fetched from psutil Python library, because LHM does not have it.
-# This is because LHM is a hardware-oriented library, whereas used/free/total space is for partitions, not disks
+# NOTE: all disk data are fetched from psutil Python src, because LHM does not have it.
+# This is because LHM is a hardware-oriented src, whereas used/free/total space is for partitions, not disks
 class Disk(sensors.Disk):
     @staticmethod
     def disk_usage_percent() -> float:
@@ -379,9 +446,11 @@ class Disk(sensors.Disk):
 
 class Net(sensors.Net):
     @staticmethod
-    def stats(if_name, interval) -> Tuple[
-        int, int, int, int]:  # up rate (B/s), uploaded (B), dl rate (B/s), downloaded (B)
-
+    def stats(
+        if_name, interval
+    ) -> Tuple[
+        int, int, int, int
+    ]:  # up rate (B/s), uploaded (B), dl rate (B/s), downloaded (B)
         upload_rate = 0
         uploaded = 0
         download_rate = 0
@@ -391,16 +460,21 @@ class Net(sensors.Net):
             net_if = get_net_interface_and_update(if_name)
             if net_if is not None:
                 for sensor in net_if.Sensors:
-                    if sensor.SensorType == Hardware.SensorType.Data and str(sensor.Name).startswith("Data Uploaded"):
+                    if sensor.SensorType == Hardware.SensorType.Data and str(
+                        sensor.Name
+                    ).startswith("Data Uploaded"):
                         uploaded = int(sensor.Value * 1000000000.0)
-                    elif sensor.SensorType == Hardware.SensorType.Data and str(sensor.Name).startswith(
-                            "Data Downloaded"):
+                    elif sensor.SensorType == Hardware.SensorType.Data and str(
+                        sensor.Name
+                    ).startswith("Data Downloaded"):
                         downloaded = int(sensor.Value * 1000000000.0)
-                    elif sensor.SensorType == Hardware.SensorType.Throughput and str(sensor.Name).startswith(
-                            "Upload Speed"):
+                    elif sensor.SensorType == Hardware.SensorType.Throughput and str(
+                        sensor.Name
+                    ).startswith("Upload Speed"):
                         upload_rate = int(sensor.Value)
-                    elif sensor.SensorType == Hardware.SensorType.Throughput and str(sensor.Name).startswith(
-                            "Download Speed"):
+                    elif sensor.SensorType == Hardware.SensorType.Throughput and str(
+                        sensor.Name
+                    ).startswith("Download Speed"):
                         download_rate = int(sensor.Value)
 
         return upload_rate, uploaded, download_rate, downloaded

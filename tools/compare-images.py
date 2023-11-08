@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# turing-smart-screen-python - a Python system monitor and library for USB-C displays like Turing Smart Screen or XuanFang
+# turing-smart-screen-python - a Python system monitor and src for USB-C displays like Turing Smart Screen or XuanFang
 # https://github.com/mathoudebine/turing-smart-screen-python/
 
 # Copyright (C) 2021-2023  Matthieu Houdebine (mathoudebine)
@@ -23,8 +23,8 @@ import sys
 
 from PIL import Image, ImageChops
 
-im1 = Image.open(sys.argv[1]).convert('RGB')
-im2 = Image.open(sys.argv[2]).convert('RGB')
+im1 = Image.open(sys.argv[1]).convert("RGB")
+im2 = Image.open(sys.argv[2]).convert("RGB")
 
 if list(im1.getdata()) == list(im2.getdata()):
     print("The 2 pictures are visually identical")

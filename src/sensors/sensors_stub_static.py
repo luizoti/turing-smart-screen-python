@@ -1,4 +1,4 @@
-# turing-smart-screen-python - a Python system monitor and library for USB-C displays like Turing Smart Screen or XuanFang
+# turing-smart-screen-python - a Python system monitor and src for USB-C displays like Turing Smart Screen or XuanFang
 # https://github.com/mathoudebine/turing-smart-screen-python/
 
 # Copyright (C) 2021-2023  Matthieu Houdebine (mathoudebine)
@@ -22,7 +22,7 @@
 
 from typing import Tuple
 
-import library.sensors.sensors as sensors
+import src.sensors.sensors as sensors
 
 # Define here global static values that will be applied to all sensors of the same type
 PERCENTAGE_SENSOR_VALUE = 50.0
@@ -61,9 +61,15 @@ class Cpu(sensors.Cpu):
 
 class Gpu(sensors.Gpu):
     @staticmethod
-    def stats() -> Tuple[float, float, float, float]:  # load (%) / used mem (%) / used mem (Mb) / temp (°C)
-        return PERCENTAGE_SENSOR_VALUE, PERCENTAGE_SENSOR_VALUE, \
-            GPU_MEM_TOTAL_SIZE_GB / 100 * PERCENTAGE_SENSOR_VALUE * 1000, TEMPERATURE_SENSOR_VALUE
+    def stats() -> (
+        Tuple[float, float, float, float]
+    ):  # load (%) / used mem (%) / used mem (Mb) / temp (°C)
+        return (
+            PERCENTAGE_SENSOR_VALUE,
+            PERCENTAGE_SENSOR_VALUE,
+            GPU_MEM_TOTAL_SIZE_GB / 100 * PERCENTAGE_SENSOR_VALUE * 1000,
+            TEMPERATURE_SENSOR_VALUE,
+        )
 
     @staticmethod
     def fps() -> int:
@@ -89,7 +95,10 @@ class Memory(sensors.Memory):
 
     @staticmethod
     def virtual_free() -> int:  # In bytes
-        return int(MEMORY_TOTAL_SIZE_GB / 100 * (100 - PERCENTAGE_SENSOR_VALUE)) * 1000000000
+        return (
+            int(MEMORY_TOTAL_SIZE_GB / 100 * (100 - PERCENTAGE_SENSOR_VALUE))
+            * 1000000000
+        )
 
 
 class Disk(sensors.Disk):
@@ -103,11 +112,21 @@ class Disk(sensors.Disk):
 
     @staticmethod
     def disk_free() -> int:  # In bytes
-        return int(DISK_TOTAL_SIZE_GB / 100 * (100 - PERCENTAGE_SENSOR_VALUE)) * 1000000000
+        return (
+            int(DISK_TOTAL_SIZE_GB / 100 * (100 - PERCENTAGE_SENSOR_VALUE)) * 1000000000
+        )
 
 
 class Net(sensors.Net):
     @staticmethod
-    def stats(if_name, interval) -> Tuple[
-        int, int, int, int]:  # up rate (B/s), uploaded (B), dl rate (B/s), downloaded (B)
-        return NETWORK_SPEED_BYTES, NETWORK_SPEED_BYTES, NETWORK_SPEED_BYTES, NETWORK_SPEED_BYTES
+    def stats(
+        if_name, interval
+    ) -> Tuple[
+        int, int, int, int
+    ]:  # up rate (B/s), uploaded (B), dl rate (B/s), downloaded (B)
+        return (
+            NETWORK_SPEED_BYTES,
+            NETWORK_SPEED_BYTES,
+            NETWORK_SPEED_BYTES,
+            NETWORK_SPEED_BYTES,
+        )

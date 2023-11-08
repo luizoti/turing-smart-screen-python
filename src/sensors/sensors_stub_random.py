@@ -1,4 +1,4 @@
-# turing-smart-screen-python - a Python system monitor and library for USB-C displays like Turing Smart Screen or XuanFang
+# turing-smart-screen-python - a Python system monitor and src for USB-C displays like Turing Smart Screen or XuanFang
 # https://github.com/mathoudebine/turing-smart-screen-python/
 
 # Copyright (C) 2021-2023  Matthieu Houdebine (mathoudebine)
@@ -22,7 +22,7 @@
 import random
 from typing import Tuple
 
-import library.sensors.sensors as sensors
+import src.sensors.sensors as sensors
 
 
 class Cpu(sensors.Cpu):
@@ -49,8 +49,15 @@ class Cpu(sensors.Cpu):
 
 class Gpu(sensors.Gpu):
     @staticmethod
-    def stats() -> Tuple[float, float, float, float]:  # load (%) / used mem (%) / used mem (Mb) / temp (°C)
-        return random.uniform(0, 100), random.uniform(0, 100), random.uniform(300, 16000), random.uniform(30, 90)
+    def stats() -> (
+        Tuple[float, float, float, float]
+    ):  # load (%) / used mem (%) / used mem (Mb) / temp (°C)
+        return (
+            random.uniform(0, 100),
+            random.uniform(0, 100),
+            random.uniform(300, 16000),
+            random.uniform(30, 90),
+        )
 
     @staticmethod
     def fps() -> int:
@@ -95,7 +102,14 @@ class Disk(sensors.Disk):
 
 class Net(sensors.Net):
     @staticmethod
-    def stats(if_name, interval) -> Tuple[
-        int, int, int, int]:  # up rate (B/s), uploaded (B), dl rate (B/s), downloaded (B)
-        return random.randint(1000000, 999000000), random.randint(1000000, 999000000), random.randint(
-            1000000, 999000000), random.randint(1000000, 999000000)
+    def stats(
+        if_name, interval
+    ) -> Tuple[
+        int, int, int, int
+    ]:  # up rate (B/s), uploaded (B), dl rate (B/s), downloaded (B)
+        return (
+            random.randint(1000000, 999000000),
+            random.randint(1000000, 999000000),
+            random.randint(1000000, 999000000),
+            random.randint(1000000, 999000000),
+        )

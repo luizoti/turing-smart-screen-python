@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# turing-smart-screen-python - a Python system monitor and library for USB-C displays like Turing Smart Screen or XuanFang
+# turing-smart-screen-python - a Python system monitor and src for USB-C displays like Turing Smart Screen or XuanFang
 # https://github.com/mathoudebine/turing-smart-screen-python/
 
 # Copyright (C) 2021-2023  Matthieu Houdebine (mathoudebine)
@@ -21,23 +21,27 @@
 # and their associated preview
 
 import os
+
 import yaml
 
 
 def get_themes(display_size: str):
     themes = []
-    directory = 'res/themes/'
-    for filename in os.listdir('res/themes'):
+    directory = "assets/themes/"
+    for filename in os.listdir("assets/themes"):
         dir = os.path.join(directory, filename)
         # checking if it is a directory
         if os.path.isdir(dir):
             # Check if a theme.yaml file exists
-            theme = os.path.join(dir, 'theme.yaml')
+            theme = os.path.join(dir, "theme.yaml")
             if os.path.isfile(theme):
                 # Get display size from theme.yaml
-                with open(theme, "rt", encoding='utf8') as stream:
+                with open(theme, "rt", encoding="utf8") as stream:
                     theme_data = yaml.safe_load(stream)
-                    if theme_data['display'].get("DISPLAY_SIZE", '3.5"') == display_size:
+                    if (
+                        theme_data["display"].get("DISPLAY_SIZE", '3.5"')
+                        == display_size
+                    ):
                         themes.append(filename)
     return sorted(themes, key=str.casefold)
 
@@ -46,34 +50,39 @@ if __name__ == "__main__":
     themes3inch = get_themes('3.5"')
     themes5inch = get_themes('5"')
 
-    with open("res/themes/themes.md", "w", encoding='utf-8') as file:
-        file.write("<!--- This file is generated automatically by GitHub Actions, do not edit it! --->\n")
+    with open("assets/themes/themes.md", "w", encoding="utf-8") as file:
+        file.write(
+            "<!--- This file is generated automatically by GitHub Actions, do not edit it! --->\n"
+        )
         file.write("\n")
         file.write("# Turing Smart Screen themes\n")
         file.write("\n")
         file.write("ℹ️ Click on a preview to view full size\n\n")
-        file.write("[3.5\" themes](#35-themes)\n\n")
-        file.write("[5\" themes](#5-themes)\n")
+        file.write('[3.5" themes](#35-themes)\n\n')
+        file.write('[5" themes](#5-themes)\n')
 
-        file.write("\n## 3.5\" themes\n")
+        file.write('\n## 3.5" themes\n')
         file.write("<table>")
         i = 0
         for theme in themes3inch:
-            file.write(f"<td>{theme}<img src=\"https://raw.githubusercontent.com/mathoudebine/turing-smart-screen-python/main/res/themes/{theme}/preview.png\" width=\"150\"/></td>")
+            file.write(
+                f'<td>{theme}<img src="https://raw.githubusercontent.com/mathoudebine/turing-smart-screen-python/main/res/themes/{theme}/preview.png" width="150"/></td>'
+            )
             i = i + 1
             if i >= 5:
                 file.write("</table><table>")
                 i = 0
         file.write("</table>\n")
 
-        file.write("\n## 5\" themes\n")
+        file.write('\n## 5" themes\n')
         file.write("<table>")
         i = 0
         for theme in themes5inch:
-            file.write(f"<td>{theme}<img src=\"https://raw.githubusercontent.com/mathoudebine/turing-smart-screen-python/main/res/themes/{theme}/preview.png\" width=\"150\"/></td>")
+            file.write(
+                f'<td>{theme}<img src="https://raw.githubusercontent.com/mathoudebine/turing-smart-screen-python/main/res/themes/{theme}/preview.png" width="150"/></td>'
+            )
             i = i + 1
             if i >= 5:
                 file.write("</table><table>")
                 i = 0
         file.write("</table>\n")
-

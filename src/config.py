@@ -1,4 +1,4 @@
-# turing-smart-screen-python - a Python system monitor and library for USB-C displays like Turing Smart Screen or XuanFang
+# turing-smart-screen-python - a Python system monitor and src for USB-C displays like Turing Smart Screen or XuanFang
 # https://github.com/mathoudebine/turing-smart-screen-python/
 
 # Copyright (C) 2021-2023  Matthieu Houdebine (mathoudebine)
@@ -24,37 +24,42 @@ import sys
 
 import yaml
 
-from library.log import logger
+from src import WORKING_DIR
+from src.log import logger
 
 
 def load_yaml(configfile):
-    with open(configfile, "rt", encoding='utf8') as stream:
+    with open(configfile, "rt", encoding="utf8") as stream:
         yamlconfig = yaml.safe_load(stream)
         return yamlconfig
 
 
-PATH = sys.path[0]
-CONFIG_DATA = load_yaml("config.yaml")
-THEME_DEFAULT = load_yaml("res/themes/default.yaml")
+CONFIG_DATA = load_yaml(os.path.join(WORKING_DIR, "config.yaml"))
+THEME_DEFAULT = load_yaml(os.path.join(WORKING_DIR, "assets/themes/default.yaml"))
 THEME_DATA = None
 
 
 def copy_default(default, theme):
-    """recursively supply default values into a dict of dicts of dicts ...."""
+    """recursively supply default values into a dict of dicts ...."""
     for k, v in default.items():
         if k not in theme:
             theme[k] = v
-        if type(v) == type({}):
+        if isinstance(v, dict):
             copy_default(default[k], theme[k])
 
 
 def load_theme():
     global THEME_DATA
     try:
-        theme_path = "res/themes/" + CONFIG_DATA['config']['THEME'] + "/"
-        logger.info("Loading theme %s from %s" % (CONFIG_DATA['config']['THEME'], theme_path + "theme.yaml"))
-        THEME_DATA = load_yaml(theme_path + "theme.yaml")
-        THEME_DATA['PATH'] = theme_path
+        theme_path = os.path.join(
+            WORKING_DIR, "assets", "themes/", CONFIG_DATA["config"]["THEME"]
+        )
+        logger.info(
+            "Loading theme %s from %s"
+            % (CONFIG_DATA["config"]["THEME"], theme_path + "/theme.yaml")
+        )
+        THEME_DATA = load_yaml(os.path.join(WORKING_DIR, theme_path + "/theme.yaml"))
+        THEME_DATA["PATH"] = theme_path
     except:
         logger.error("Theme not found or contains errors!")
         try:
@@ -68,9 +73,13 @@ def load_theme():
 def check_theme_compatible(display_size: str):
     global THEME_DATA
     # Check if theme is compatible with hardware revision
-    if display_size != THEME_DATA['display'].get("DISPLAY_SIZE", '3.5"'):
-        logger.error("The selected theme " + CONFIG_DATA['config'][
-            'THEME'] + " is not compatible with your display revision " + CONFIG_DATA["display"]["REVISION"])
+    if display_size != THEME_DATA["display"].get("DISPLAY_SIZE", '3.5"'):
+        logger.error(
+            "The selected theme "
+            + CONFIG_DATA["config"]["THEME"]
+            + " is not compatible with your display revision "
+            + CONFIG_DATA["display"]["REVISION"]
+        )
         try:
             sys.exit(0)
         except:
