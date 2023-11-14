@@ -24,11 +24,13 @@ import os
 
 import yaml
 
+from src import WORKING_DIR
+
 
 def get_themes(display_size: str):
     themes = []
-    directory = "assets/themes/"
-    for filename in os.listdir("assets/themes"):
+    directory = os.path.join(WORKING_DIR, "assets/themes/")
+    for filename in os.listdir(directory):
         dir = os.path.join(directory, filename)
         # checking if it is a directory
         if os.path.isdir(dir):
@@ -50,7 +52,9 @@ if __name__ == "__main__":
     themes3inch = get_themes('3.5"')
     themes5inch = get_themes('5"')
 
-    with open("assets/themes/themes.md", "w", encoding="utf-8") as file:
+    with open(
+        os.path.join(WORKING_DIR, "assets/themes/themes.md"), "w", encoding="utf-8"
+    ) as file:
         file.write(
             "<!--- This file is generated automatically by GitHub Actions, do not edit it! --->\n"
         )

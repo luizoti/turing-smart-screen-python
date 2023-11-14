@@ -94,7 +94,7 @@ class LcdComm(ABC):
                 try:
                     sys.exit(0)
                 except:
-                    os._exit(0)
+                    os._exit(0)  # noqa
             else:
                 logger.debug(f"Auto detected COM port: {self.com_port}")
         else:
@@ -107,7 +107,7 @@ class LcdComm(ABC):
             try:
                 sys.exit(0)
             except:
-                os._exit(0)
+                os._exit(0)  # noqa
 
     def close_serial(self):
         try:
@@ -268,7 +268,7 @@ class LcdComm(ABC):
         if (font, font_size) not in self.font_cache:
             print(font, font_size)
             self.font_cache[(font, font_size)] = ImageFont.truetype(
-                os.path.join("assets", "fonts", font, font_size)
+                os.path.join("assets", "fonts", font), font_size
             )
         font = self.font_cache[(font, font_size)]
         d = ImageDraw.Draw(text_image)
@@ -364,10 +364,7 @@ class LcdComm(ABC):
 
         self.display_pil_image(bar_image, x, y)
 
-    def display_radial_progressbar(
-        self,
-        **kwargs,
-    ):
+    def display_radial_progressbar(self, **kwargs):
         # Generate a radial progress bar and display it
         # Provide the background image path to display progress bar with transparent background
         xc = kwargs.get("xc")
@@ -391,9 +388,9 @@ class LcdComm(ABC):
         font_size = kwargs.get("font_size", 20)
 
         background_color = tuple(
-            map(int, kwargs.get("background_color", "255, 255, 255").split(", "))
+            map(int, kwargs.get("background_color", (255, 255, 255)))
         )
-        font_color = tuple(map(int, kwargs.get("font_color", "0, 0, 0").split(", ")))
+        font_color = tuple(map(int, kwargs.get("font_color", (0, 0, 0))))
 
         if angle_start % 361 == angle_end % 361:
             if clockwise:
@@ -433,7 +430,7 @@ class LcdComm(ABC):
         diameter = 2 * radius
         bbox = (xc - radius, yc - radius, xc + radius, yc + radius)
         #
-        if background_image is None:
+        if not background_image:
             # A bitmap is created with solid background
             bar_image = Image.new("RGB", (diameter, diameter), background_color)
         else:

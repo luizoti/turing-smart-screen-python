@@ -25,6 +25,8 @@ import subprocess
 import sys
 import webbrowser
 
+from src import WORKING_DIR
+
 MIN_PYTHON = (3, 8)
 if sys.version_info < MIN_PYTHON:
     print("[ERROR] Python %s.%s or later is required." % MIN_PYTHON)
@@ -289,10 +291,14 @@ class TuringConfigWindow:
     def load_theme_preview(self):
         try:
             theme_preview = Image.open(
-                "assets/themes/" + self.theme_cb.get() + "/preview.png"
+                os.path.join(
+                    WORKING_DIR, "assets/themes/", self.theme_cb.get(), "/preview.png"
+                )
             )
         except:
-            theme_preview = Image.open("assets/docs/no-preview.png")
+            theme_preview = Image.open(
+                os.path.join(WORKING_DIR, "assets/docs/no-preview.png")
+            )
         finally:
             if theme_preview.width > theme_preview.height:
                 theme_preview = theme_preview.resize(

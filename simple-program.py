@@ -25,6 +25,7 @@ import sys
 import time
 from datetime import datetime
 
+from src import WORKING_DIR
 # Import only the modules for LCD communication
 from src.lcd.lcd_comm_rev_a import LcdCommRevA, Orientation
 from src.lcd.lcd_comm_rev_b import LcdCommRevB
@@ -102,7 +103,7 @@ if __name__ == "__main__":
     lcd_comm.initialize_comm()
 
     # Set brightness in % (warning: revision A display can get hot at high brightness! Keep value at 50% max for rev. A)
-    lcd_comm.set_brightness(level=10)
+    lcd_comm.set_brightness(level=100)
 
     # Set backplate RGB LED color (for supported HW only)
     lcd_comm.set_backplate_led_color(led_color=(255, 255, 255))
@@ -111,10 +112,10 @@ if __name__ == "__main__":
     lcd_comm.set_orientation(orientation=Orientation.LANDSCAPE)
 
     # Define background picture
-    background = (
-        f"res/backgrounds/example_{lcd_comm.get_width()}x{lcd_comm.get_height()}.png"
+    background = os.path.join(
+        WORKING_DIR,
+        f"assets/backgrounds/example_{lcd_comm.get_width()}x{lcd_comm.get_height()}.png",
     )
-
     # Display sample picture
     logger.debug("setting background picture")
     start = time.perf_counter()
@@ -203,10 +204,10 @@ if __name__ == "__main__":
         )
 
         lcd_comm.display_radial_progressbar(
-            222,
-            260,
-            40,
-            13,
+            xc=222,
+            yc=260,
+            radius=40,
+            bar_width=13,
             min_value=0,
             max_value=100,
             angle_start=405,

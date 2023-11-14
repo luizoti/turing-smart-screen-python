@@ -163,7 +163,7 @@ class CPU:
     @staticmethod
     def percentage():
         theme_data = config.THEME_DATA["STATS"]["CPU"]["PERCENTAGE"]
-        cpu_percentage = sensors.Cpu.percentage(
+        cpu_percentage = sensors.Cpu().percentage(
             interval=theme_data.get("INTERVAL", None)
         )
         # logger.debug(f"CPU Percentage: {cpu_percentage}")
@@ -190,14 +190,14 @@ class CPU:
     def frequency():
         display_themed_value(
             theme_data=config.THEME_DATA["STATS"]["CPU"]["FREQUENCY"]["TEXT"],
-            value=f"{sensors.Cpu.frequency() / 1000:.2f}",
+            value=f"{sensors.Cpu().frequency() / 1000:.2f}",
             unit=" GHz",
             min_size=4,
         )
 
     @staticmethod
     def load():
-        cpu_load = sensors.Cpu.load()
+        cpu_load = sensors.Cpu().load()
         # logger.debug(f"CPU Load: ({cpu_load[0]},{cpu_load[1]},{cpu_load[2]})")
         load_theme_data = config.THEME_DATA["STATS"]["CPU"]["LOAD"]
 
@@ -215,13 +215,13 @@ class CPU:
 
     @staticmethod
     def is_temperature_available():
-        return sensors.Cpu.is_temperature_available()
+        return sensors.Cpu().is_temperature_available()
 
     @staticmethod
     def temperature():
         display_themed_value(
             theme_data=config.THEME_DATA["STATS"]["CPU"]["TEMPERATURE"]["TEXT"],
-            value=int(sensors.Cpu.temperature()),
+            value=int(sensors.Cpu().temperature()),
             min_size=3,
             unit="°C",
         )
@@ -521,9 +521,7 @@ class Custom:
                     numeric_value = custom_stat_class.as_numeric()
                 except:
                     logger.error(
-                        "Custom sensor class "
-                        + str(custom_stat)
-                        + " not found in sensors_custom.py"
+                        f"Custom sensor class {str(custom_stat)} not found in sensors_custom.py"
                     )
                     return
 

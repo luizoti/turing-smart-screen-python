@@ -1,5 +1,16 @@
 # turing-smart-screen-python - a Python system monitor and src for USB-C displays like Turing Smart Screen or XuanFang
 # https://github.com/mathoudebine/turing-smart-screen-python/
+import os.path
+
+from src import config
+from src.lcd.lcd_comm import Orientation
+from src.lcd.lcd_comm_rev_a import LcdCommRevA
+from src.lcd.lcd_comm_rev_b import LcdCommRevB
+from src.lcd.lcd_comm_rev_c import LcdCommRevC
+from src.lcd.lcd_comm_rev_d import LcdCommRevD
+from src.lcd.lcd_simulated import LcdSimulated
+from src.log import logger
+
 
 # Copyright (C) 2021-2023  Matthieu Houdebine (mathoudebine)
 #
@@ -15,15 +26,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-from src import config
-from src.lcd.lcd_comm import Orientation
-from src.lcd.lcd_comm_rev_a import LcdCommRevA
-from src.lcd.lcd_comm_rev_b import LcdCommRevB
-from src.lcd.lcd_comm_rev_c import LcdCommRevC
-from src.lcd.lcd_comm_rev_d import LcdCommRevD
-from src.lcd.lcd_simulated import LcdSimulated
-from src.log import logger
 
 
 def _get_full_path(path, name):
@@ -122,10 +124,13 @@ class Display:
     def display_static_images(self):
         if config.THEME_DATA.get("static_images", False):
             for image in config.THEME_DATA["static_images"]:
+                print()
                 logger.debug(f"Drawing Image: {image}")
                 self.lcd.display_bitmap(
-                    bitmap_path=config.THEME_DATA["PATH"]
-                    + config.THEME_DATA["static_images"][image].get("PATH"),
+                    bitmap_path=os.path.join(
+                        config.THEME_DATA["PATH"],
+                        config.THEME_DATA["static_images"][image].get("PATH"),
+                    ),
                     x=config.THEME_DATA["static_images"][image].get("X", 0),
                     y=config.THEME_DATA["static_images"][image].get("Y", 0),
                     width=config.THEME_DATA["static_images"][image].get("WIDTH", 0),
